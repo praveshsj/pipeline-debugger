@@ -1,0 +1,92 @@
+{
+  "name": "Pipeline Debugger",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
+  "workspaceFolder": "/app",
+
+  // Features to install in the container
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Configure tool-specific properties
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        "ms-azuretools.vscode-docker",
+        "github.copilot",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "yzhang.markdown-all-in-one",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.ruffEnabled": true,
+        "python.formatting.provider": "black",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": true
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true
+        }
+      }
+    }
+  },
+
+  // Ports to forward
+  "forwardPorts": [
+    8000,  // Backend API
+    5432,  // PostgreSQL
+    6379   // Redis
+  ],
+
+  // Port attributes
+  "portsAttributes": {
+    "8000": {
+      "label": "Backend API",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Commands to run after container is created
+  "postCreateCommand": "pip install -r requirements.txt && echo '✅ Dependencies installed!'",
+
+  // Commands to run when container starts
+  "postStartCommand": "echo '🚀 Pipeline Debugger is ready! Run: uvicorn app.main:app --reload'",
+
+  // Set environment variables
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://postgres:postgres@db:5432/pipeline_debugger",
+    "REDIS_URL": "redis://redis:6379/0"
+  },
+
+  // User to run as
+  "remoteUser": "appuser",
+
+  // Mount the workspace
+  "mounts": [
+    "source=${localWorkspaceFolder}/backend,target=/app,type=bind"
+  ]
+}
